@@ -160,22 +160,22 @@ export const SubText = styled(Text)`
 `;
 
 export const Button = styled.button`
-    cursor: ${props => props.checkDisabled ? "default" : "pointer"};
-    border-color: white;
-    border-radius: 0.5em;
-    color: #555555;
-    margin-block-start: 0.5em;
-    margin-block-end: 0.5em;
-    padding: 0em;
-    font-size: 1em;
-    width: ${props => props.fullWidth ? "100%" : "5em"};
-    height: 2em;
+    cursor: ${props => props.checkDisabled ? "default" : "pointer"} !important;
+    border-color: white !important;
+    border-radius: 0.5em !important;
+    color: #555555 !important;
+    margin-block-start: 0.5em !important;
+    margin-block-end: 0.5em !important;
+    padding: 0em !important;
+    font-size: 1em !important;
+    width: ${props => props.fullWidth ? "100%" : "5em"} !important;
+    height: 2em !important;
 
     &:hover {
-        background: white;
+        background: white !important;
     }
 
-    opacity: ${props => props.checkDisabled ? 0.6 : 1};
+    opacity: ${props => props.checkDisabled ? 0.6 : 1} !important;
 `;
 
 export const HintDiv = styled.div`

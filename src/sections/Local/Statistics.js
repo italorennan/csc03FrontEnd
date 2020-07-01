@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Section, Text, SubText, TextSection, Button, AllGraphSection, GraphSection, HintDiv, MainHeaderTableCell, SubHeaderTableCell, BodyTableCell, Title, StyledTablePagination } from '../../pages/Local/styles';
-import { XYPlot, LineSeries, LineMarkSeries, XAxis, YAxis, Hint } from 'react-vis';
+import { Section, Text, SubText, TextSection, Button, AllGraphSection, GraphSection, HintDiv, MainHeaderTableCell, BodyTableCell, StyledTablePagination } from '../../pages/Local/styles';
+import { XYPlot, LineMarkSeries, XAxis, YAxis, Hint } from 'react-vis';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardDateTimePicker } from '@material-ui/pickers';
 import 'react-vis/dist/style.css';
@@ -11,9 +11,6 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
-import Paper from '@material-ui/core/Paper';
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 
 const useRowStyles = makeStyles({
     root: {
@@ -527,8 +524,6 @@ function Statistics() {
             onChangePage={(e, newPage) => {setState({...state, page: newPage})}}
             onChangeRowsPerPage={e => {setState({...state, rowsPerPage: e.target.value, page: 0})}}
         />
-
-        {console.log(state)}
         </>
     );
 }
