@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Section, Text, SubText, TextSection, Button, AllGraphSection, GraphSection, HintDiv, MainHeaderTableCell, BodyTableCell, StyledTablePagination } from '../../pages/Local/styles';
 import { XYPlot, LineMarkSeries, XAxis, YAxis, Hint } from 'react-vis';
 import DateFnsUtils from '@date-io/date-fns';
@@ -11,6 +11,8 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
+import LocalContext from '../../pages/Local/context';
+import api from '../../services/api';
 
 const useRowStyles = makeStyles({
     root: {
@@ -41,6 +43,7 @@ const useStyles = makeStyles({
 });
 
 function Statistics() {
+    const { storeData } = useContext(LocalContext);
     const [state, setState] = useState({minDate: new Date((new Date(Date.now())).getFullYear(), (new Date(Date.now())).getMonth(), (new Date(Date.now())).getDate(), 0, 0, 0, 0),
                                         maxDate: new Date((new Date(Date.now())).getFullYear(), (new Date(Date.now())).getMonth(), (new Date(Date.now())).getDate(), 23, 59, 59, 999),
                                         clicked: false,
@@ -78,42 +81,12 @@ function Statistics() {
         if (timeDif > 0) getData(state.minDate, date);
     }
 
-    const getData = (minDate, maxDate) => {
-        // Puxar dados do DB
-        const newEvents = [
-            {eventType: "entry", createdAt: new Date(2020, 5, 30, 10)},
-            {eventType: "exit", createdAt: new Date(2020, 5, 30, 10, 30)},
-            {eventType: "entry", createdAt: new Date(2020, 5, 30, 10)},
-            {eventType: "exit", createdAt: new Date(2020, 5, 30, 11, 30)},
-            {eventType: "entry", createdAt: new Date(2020, 5, 30, 10)},
-            {eventType: "exit", createdAt: new Date(2020, 5, 30, 12, 30)},
-            {eventType: "entry", createdAt: new Date(2020, 5, 30, 10)},
-            {eventType: "exit", createdAt: new Date(2020, 5, 30, 13, 30)},
-            {eventType: "entry", createdAt: new Date(2020, 5, 30, 10)},
-            {eventType: "exit", createdAt: new Date(2020, 5, 30, 10, 20)},
-            {eventType: "entry", createdAt: new Date(2020, 5, 30, 11)},
-            {eventType: "exit", createdAt: new Date(2020, 5, 30, 11, 20)},
-            {eventType: "entry", createdAt: new Date(2020, 5, 30, 11)},
-            {eventType: "exit", createdAt: new Date(2020, 5, 30, 14, 20)},
-            {eventType: "entry", createdAt: new Date(2020, 5, 30, 12)},
-            {eventType: "exit", createdAt: new Date(2020, 5, 30, 13, 20)},
-            {eventType: "entry", createdAt: new Date(2020, 4, 30)},
-            {eventType: "exit", createdAt: new Date(2020, 3, 30)},
-            {eventType: "entry", createdAt: new Date(2020, 3, 30)},
-            {eventType: "exit", createdAt: new Date(2020, 3, 15)},
-            {eventType: "entry", createdAt: new Date(2020, 3, 7)},
-            {eventType: "entry", createdAt: new Date(2020, 2, 10)},
-            {eventType: "entry", createdAt: new Date(2020, 2, 14)},
-            {eventType: "entry", createdAt: new Date(2020, 2, 20)},
-            {eventType: "exit", createdAt: new Date(2020, 2, 2)},
-            {eventType: "entry", createdAt: new Date(2020, 2, 14)},
-            {eventType: "entry", createdAt: new Date(2020, 2, 14)},
-            {eventType: "entry", createdAt: new Date(2020, 2, 14)},
-            {eventType: "entry", createdAt: new Date(2020, 2, 13)},
-            {eventType: "entry", createdAt: new Date(2020, 2, 15)},
-            {eventType: "entry", createdAt: new Date(2020, 2, 15)},
-            {eventType: "exit", createdAt: new Date(2020, 2, 16)}
-        ];
+    async function getData(minDate, maxDate) {
+        const eventsData = await api.get(`/event/getQueryData?storeNumber=${storeData.storeNumber}&startDate=${minDate.toISOString()}&finishDate=${maxDate.toISOString()}`);
+        const newEvents = eventsData.data.eventList;
+        newEvents.map((event) => {
+            event.createdAt = new Date(Date.parse(event.createdAt));
+        });
 
         const timeDif = maxDate - minDate;
         if (timeDif < 7200000) setState({...state, clicked: true, minDate: minDate, maxDate: maxDate, events: newEvents, timeScale: "minutes"});
@@ -506,7 +479,7 @@ function Statistics() {
                         <TableRow className={classes.root}>
                             <BodyTableCell />
                             {columns.map((column) => (
-                                <BodyTableCell align={column.align}>{row[column.id]}</BodyTableCell>
+                                <BodyTableCell key={column.label} align={column.align}>{row[column.id]}</BodyTableCell>
                             ))}
                         </TableRow>
                     ))}

@@ -1,19 +1,28 @@
 import React, { useState, useContext } from 'react';
 import { LoginContainer, Button, ErrorLoginMessage } from '../../pages/Local/styles';
 import LoginContext from '../../pages/Local/context';
+import api from '../../services/api';
 
 function Login() {
-    const [state, setState] = useState({storeNumber: 1,
+    const [state, setState] = useState({storeNumber: 0,
                                         accessCode: "",
                                         loginError: false});
-    const { handleAccess, setStoreNumber } = useContext(LoginContext);
-    const localCode = "temp"; // temporário -> integrar back                                    
+    const { handleAccess, setStoreData } = useContext(LoginContext);
 
-    function handleLogin() {
-        if (state.accessCode === localCode) {
-            setStoreNumber(state.storeNumber);
+    async function handleLogin() {
+        const tryAccess = {
+            storeNumber: state.storeNumber,
+            accessCode: state.accessCode
+        }
+
+        var storeData = await api.post('/store/login',
+            JSON.stringify(tryAccess), { headers: { 'Content-Type': 'application/json' }}
+        );
+        if (storeData.data.authorization === true) {
+            setStoreData(storeData.data.store);
             handleAccess();
         }
+
         else setState({...state, loginError: true});
     }
 
