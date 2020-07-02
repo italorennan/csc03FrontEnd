@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Section, Text, SubText, TextSection, Button, AllGraphSection, GraphSection, HintDiv, MainHeaderTableCell, BodyTableCell, StyledTablePagination } from '../../pages/Global/styles';
 import { XYPlot, LineMarkSeries, XAxis, YAxis, Hint } from 'react-vis';
 import DiscreteColorLegend from 'react-vis/dist/legends/discrete-color-legend';
@@ -12,6 +12,8 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
+import GlobalContext from '../../pages/Global/context';
+import api from '../../services/api';
 
 const useRowStyles = makeStyles({
     root: {
@@ -42,24 +44,11 @@ const useStyles = makeStyles({
 });
 
 function Statistics() {
-    // Puxar do DB
-    const store1 = {
-        storeName: "Loja Fortaleza",
-        storeNumber: 8001,
-        accessCode: "temp",
-        index: 0
-    };
-    const store2 = {
-        storeName: "Loja São Paulo",
-        storeNumber: 8002,
-        accessCode: "temp",
-        index: 1
-    };
-    const storesData = [store1, store2];
-    const lineColors = ['#000066', '#cc0066', '#cc0000', '#b266ff', '#33ff99'];
+    const { storesData } = useContext(GlobalContext);
+    const lineColors = ['#000066', '#cc0066', '#cc0000', '#b266ff', '#33ff99', '#cc6600'];
     var legendItems = [];
     storesData.map((store) => {
-        legendItems.push({title: store.storeName, color: lineColors[store.index]});
+        legendItems.push({title: store.storeName, color: lineColors[store.storeNumber]});
     });
 
     const [state, setState] = useState({minDate: new Date((new Date(Date.now())).getFullYear(), (new Date(Date.now())).getMonth(), (new Date(Date.now())).getDate(), 0, 0, 0, 0),
@@ -107,43 +96,12 @@ function Statistics() {
         if (timeDif > 0) getData(state.minDate, date);
     }
 
-    const getData = (minDate, maxDate) => {
-        // Puxar dados do DB
-        // Usar variável state.storeSelected
-        const newEvents = [
-            {storeNumber: 8001, eventType: "entry", createdAt: new Date(2020, 5, 30, 10)},
-            {storeNumber: 8001, eventType: "exit", createdAt: new Date(2020, 5, 30, 10, 30)},
-            {storeNumber: 8001, eventType: "entry", createdAt: new Date(2020, 5, 30, 10)},
-            {storeNumber: 8001, eventType: "exit", createdAt: new Date(2020, 5, 30, 11, 30)},
-            {storeNumber: 8002, eventType: "entry", createdAt: new Date(2020, 5, 30, 10)},
-            {storeNumber: 8002, eventType: "exit", createdAt: new Date(2020, 5, 30, 12, 30)},
-            {storeNumber: 8002, eventType: "entry", createdAt: new Date(2020, 5, 30, 10)},
-            {storeNumber: 8002, eventType: "exit", createdAt: new Date(2020, 5, 30, 13, 30)},
-            {storeNumber: 8002, eventType: "entry", createdAt: new Date(2020, 5, 30, 10)},
-            {storeNumber: 8002, eventType: "exit", createdAt: new Date(2020, 5, 30, 10, 20)},
-            {storeNumber: 8002, eventType: "entry", createdAt: new Date(2020, 5, 30, 11)},
-            {storeNumber: 8002, eventType: "exit", createdAt: new Date(2020, 5, 30, 11, 20)},
-            {storeNumber: 8002, eventType: "entry", createdAt: new Date(2020, 5, 30, 11)},
-            {storeNumber: 8002, eventType: "exit", createdAt: new Date(2020, 5, 30, 14, 20)},
-            {storeNumber: 8002, eventType: "entry", createdAt: new Date(2020, 5, 30, 12)},
-            {storeNumber: 8002, eventType: "exit", createdAt: new Date(2020, 5, 30, 13, 20)},
-            {storeNumber: 8001, eventType: "entry", createdAt: new Date(2020, 4, 30)},
-            {storeNumber: 8001, eventType: "exit", createdAt: new Date(2020, 3, 30)},
-            {storeNumber: 8001, eventType: "entry", createdAt: new Date(2020, 3, 30)},
-            {storeNumber: 8001, eventType: "exit", createdAt: new Date(2020, 3, 15)},
-            {storeNumber: 8001, eventType: "entry", createdAt: new Date(2020, 3, 7)},
-            {storeNumber: 8001, eventType: "entry", createdAt: new Date(2020, 2, 10)},
-            {storeNumber: 8001, eventType: "entry", createdAt: new Date(2020, 2, 14)},
-            {storeNumber: 8002, eventType: "entry", createdAt: new Date(2020, 2, 20)},
-            {storeNumber: 8002, eventType: "exit", createdAt: new Date(2020, 2, 2)},
-            {storeNumber: 8002, eventType: "entry", createdAt: new Date(2020, 2, 14)},
-            {storeNumber: 8002, eventType: "entry", createdAt: new Date(2020, 2, 14)},
-            {storeNumber: 8002, eventType: "entry", createdAt: new Date(2020, 2, 14)},
-            {storeNumber: 8002, eventType: "entry", createdAt: new Date(2020, 2, 13)},
-            {storeNumber: 8002, eventType: "entry", createdAt: new Date(2020, 2, 15)},
-            {storeNumber: 8002, eventType: "entry", createdAt: new Date(2020, 2, 15)},
-            {storeNumber: 8002, eventType: "exit", createdAt: new Date(2020, 2, 16)}
-        ];
+    async function getData(minDate, maxDate) {
+        const eventsData = await api.get(`/event/getQueryData?startDate=${minDate.toISOString()}&finishDate=${maxDate.toISOString()}`);
+        const newEvents = eventsData.data.eventList;
+        newEvents.map((event) => {
+            event.createdAt = new Date(Date.parse(event.createdAt));
+        });
 
         const timeDif = maxDate - minDate;
         if (timeDif < 7200000) setState({...state, clicked: true, minDate: minDate, maxDate: maxDate, events: newEvents, timeScale: "minutes"});
@@ -625,9 +583,9 @@ function Statistics() {
                     {state.storesData.map((store) => (
                         <LineMarkSeries 
                             key={store.storeNumber} className={"series-" + store.storeNumber}
-                            data={state.firstPerStoreData[store.index]}
+                            data={state.firstPerStoreData[store.storeNumber]}
                             style={{ strokeWidth: '3px' }} size={2}
-                            lineStyle={{ stroke: lineColors[store.index] }} markStyle={{ stroke: '#0099999' }}
+                            lineStyle={{ stroke: lineColors[store.storeNumber] }} markStyle={{ stroke: '#0099999' }}
                             onValueMouseOver={d => setState({...state, overFirstPerStoreGraph: d})}
                             onValueMouseOut={d => setState({...state, overFirstPerStoreGraph: false})}
                         />
@@ -664,9 +622,9 @@ function Statistics() {
                     {state.storesData.map((store) => (
                         <LineMarkSeries 
                             key={store.storeNumber} className={"series-" + store.storeNumber}
-                            data={state.secondPerStoreData[store.index]}
+                            data={state.secondPerStoreData[store.storeNumber]}
                             style={{ strokeWidth: '3px' }} size={2}
-                            lineStyle={{ stroke: lineColors[store.index] }} markStyle={{ stroke: '#0099999' }}
+                            lineStyle={{ stroke: lineColors[store.storeNumber] }} markStyle={{ stroke: '#0099999' }}
                             onValueMouseOver={d => setState({...state, overSecondPerStoreGraph: d})}
                             onValueMouseOut={d => setState({...state, overSecondPerStoreGraph: false})}
                         />
@@ -699,7 +657,7 @@ function Statistics() {
             <select id="selectTableStore" onChange={handleTableStore}>
                 <option value='all'>Todas</option>
                 {state.storesData.map((store) => (
-                    <option key={store.storeNumber} value={store.index}>{store.storeName}</option>
+                    <option key={store.storeNumber} value={store.storeNumber}>{store.storeName}</option>
                 ))}
             </select>
         </Section>

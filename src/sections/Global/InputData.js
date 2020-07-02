@@ -1,19 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import GlobalContext from '../../pages/Global/context';
 import { Section, TextSection, Button, LoginContainer } from '../../pages/Global/styles';
+import api from '../../services/api';
 
 function InputData() {
-    // Puxar do DB
-    const store1 = {
-        storeName: "Loja Fortaleza",
-        storeNumber: 8001,
-        accessCode: "temp"
-    };
-    const store2 = {
-        storeName: "Loja São Paulo",
-        storeNumber: 8002,
-        accessCode: "temp"
-    };
-    const storesData = [store1, store2];
+    const { storesData } = useContext(GlobalContext);
 
     const [state, setState] = useState({section: 0,
                                         storesData: storesData,
@@ -22,7 +13,7 @@ function InputData() {
                                         newAccessCode: ''});
 
     // Salvar no DB
-    function handleUpdate() {
+    async function handleUpdate() {
         if (state.newName !== '' && state.newAccessCode !== '') {
             const newStore = {
                 storeName: state.newName,
@@ -30,22 +21,31 @@ function InputData() {
                 accessCode: state.newAccessCode
             };
 
-            setState({...state, updateStore: undefined, newName: '', newAcessCode: '', section: 0});
+            await api.put('/store/update',
+                JSON.stringify(newStore), { headers: { 'Content-Type': 'application/json' }}
+            );
+
+            var newStoresData = await api.get('/store/getAll');
+
+            setState({...state, storesData: newStoresData.data.storeList, updateStore: undefined, newName: '', newAcessCode: '', section: 0});
         }
     }
 
     // Salvar no DB
-    function handleCreate() {
+    async function handleCreate() {
         if (state.newName !== '' && state.newAccessCode !== '') {
             const newStore = {
                 storeName: state.newName,
-                accessCode: state.newAccessCode,
-                storeNumber: 8000 + state.storesData.length + 1
+                accessCode: state.newAccessCode
             };
 
-            var storesData = state.storesData;
-            storesData.push(newStore);
-            setState({...state, storesData: storesData, newName: '', newAcessCode: '', section: 0});
+            await api.post('/store/create',
+                JSON.stringify(newStore), { headers: { 'Content-Type': 'application/json' }}
+            );
+
+            var newStoresData = await api.get('/store/getAll');
+
+            setState({...state, storesData: newStoresData.data.storeList, newName: '', newAcessCode: '', section: 0});
         }
     }
 
@@ -60,6 +60,7 @@ function InputData() {
                 </Section>
             ))}
             <Button className="createStore" onClick={() => {setState({...state, section: 2})}}>Nova loja</Button>
+            {console.log(state.storesData)}
             </>
         );
     }

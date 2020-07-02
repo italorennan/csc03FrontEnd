@@ -1,23 +1,20 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Section, TextSection, Text } from '../../pages/Local/styles';
+import LocalContext from '../../pages/Local/context';
 
 function InputData() {
-    // Puxar do DB
-    const data = {
-        storeName: "Loja Fortaleza",
-        storeNumber: 8001
-    };
+    const { storeData } = useContext(LocalContext);
 
     return (
         <>
         <Text><span>Informações da loja:</span></Text>
         <Section>
             <TextSection><span>Nome:</span></TextSection>
-            <TextSection>{data.storeName}</TextSection>
+            <TextSection>{storeData.storeName}</TextSection>
         </Section>
         <Section>
             <TextSection><span>Número:</span></TextSection>
-            <TextSection>{data.storeNumber}</TextSection>
+            <TextSection>{storeData.storeNumber}</TextSection>
         </Section>
         </>
     );

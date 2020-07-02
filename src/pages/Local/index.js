@@ -1,34 +1,33 @@
 import React, { useState } from 'react';
 import LocalContext from './context';
-import { Container, PageButtonSet, PageButton } from './styles';
+import { Container, PageButtonSet, PageButton, Button } from './styles';
 import Login from '../../sections/Local/Login';
 import Home from '../../sections/Local/Home';
 import Statistics from '../../sections/Local/Statistics';
 import InputData from '../../sections/Local/InputData';
+import api from '../../services/api';
 
 function Local() {
     const [actualSection, setActualSection] = useState(0);
     const [loginData, setLoginData] = useState({logged: false, errors: ''});
-    const [storeNumber, setStoreNumber] = useState(0);
-
-    const [store, setStore] = useState("Loja Fortaleza");
+    const [storeData, setStoreData] = useState({});
 
     const sections = [
         <Login />,
-        <Home store={store}/>,
+        <Home />,
         <Statistics />,
         <InputData />
     ];
 
-    function handleAccess() {
+    async function handleAccess() {
         setActualSection(1);
     }
 
     return (
-        <LocalContext.Provider value={{ actualSection, loginData, setLoginData, handleAccess, setStoreNumber }}>
+        <LocalContext.Provider value={{ actualSection, loginData, setLoginData, handleAccess, storeData, setStoreData }}>
             <Container>
                 {actualSection !== 0 ?
-                <><h1>{store} - Fluxo de clientes</h1>
+                <><h1>{storeData.storeName} - Fluxo de clientes</h1>
                 <PageButtonSet>
                     <PageButton className="home" onClick={() => {setActualSection(1)}} thispage={actualSection === 1 ? "true" : "false"}>Início</PageButton>
                     <PageButton className="home" onClick={() => {setActualSection(2)}} thispage={actualSection === 2 ? "true" : "false"}>Estatísticas</PageButton>
@@ -37,6 +36,9 @@ function Local() {
                 </> :
                 <></>}
                 {sections[actualSection]}
+                {actualSection !== 0 ?
+                <Button onClick={() => {setActualSection(0)}}>Sair</Button>
+                : <></>}
             </Container>
         </LocalContext.Provider>
     );
